@@ -7,12 +7,14 @@
 #include <string>
 #include <map>
 
+const int CARD_TEXTURE_SIZE = 128;
+
 class TextureManager 
 {
 public:
     static TextureManager* Instance();
     void init(int windowWidth, int windowHeight, SDL_Renderer* renderer);
-    void drawCard(int card, int x, int y, int w, int h);
+    void drawCard(int card, SDL_Rect* rect);
 private:
     static TextureManager* instance;
     int windowWidth;

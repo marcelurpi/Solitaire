@@ -25,11 +25,11 @@ void TextureManager::init(int windowWidth, int windowHeight, SDL_Renderer* rende
     cardsTilesheetTexture = texture;
 }
 
-void TextureManager::drawCard(int card, int x, int y, int w, int h)
+void TextureManager::drawCard(int card, SDL_Rect* rect)
 {
     SDL_Rect srcrect{(card % 14) * 64, (card / 14) * 64, 64, 64};
-    int realX = windowWidth / 2 - w / 2 + x;
-    int realY = windowHeight / 2 - h / 2 + y;
-    SDL_Rect dstrect{ realX, realY, w, h};
+    int left = windowWidth / 2 - CARD_TEXTURE_SIZE / 2 + rect->x;
+    int top = windowHeight / 2 - CARD_TEXTURE_SIZE / 2 + rect->y;
+    SDL_Rect dstrect{ left, top, CARD_TEXTURE_SIZE, CARD_TEXTURE_SIZE};
     SDL_RenderCopy(renderer, cardsTilesheetTexture, &srcrect, &dstrect);
 }

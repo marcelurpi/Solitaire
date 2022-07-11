@@ -3,54 +3,55 @@
 
 Solitaire::Solitaire()
 {
-    srand(time(0));
+    srand(2727); //srand(time(0));
     resetBoard();
-}
 
-void Solitaire::resetBoard()
-{
-    movingCard = -1;
-    cardStacks = std::vector<std::vector<int>>(NUM_COLUMNS);
-    for (int i = 0; i < NUM_COLUMNS; i++) {
-        cardStacks[i] = std::vector<int>(i + 1, 27);
-        cardStacks[i][i] = (rand() % 4) * 14 + rand() % 13;
+    topLeft = SDL_Point{-NUM_STACKS * 100 / 2, (-150 - NUM_STACKS * 20) / 2};
+    backDeckRect = SDL_Rect{topLeft.x, topLeft.y, 84, 128};
+    frontDeckRect = SDL_Rect{topLeft.x + 100, topLeft.y, 84, 128};
+    for (int i = 0; i < 4; i++) {
+        completedRects[i] = SDL_Rect{topLeft.x + 100 * (3 + i), topLeft.y, 84, 128};
     }
+    for (int i = 0; i < NUM_STACKS; i++) {
+        stacksRects[i] = SDL_Rect{topLeft.x + 100 * i, topLeft.y + 150, 84, 128};
+    }
+
+    movingCard.card = -1;
 }
 
 void Solitaire::drawBoard()
 {
-    int leftX = -NUM_COLUMNS * 100 / 2;
-    int topY = (-150 - NUM_COLUMNS * 20) / 2;
-    TextureManager::Instance()->drawCard(27, leftX, topY, 128, 128);
-    // TextureManager::Instance()->drawCard(0, leftX + 100, topY, 128, 128);
-    TextureManager::Instance()->drawCard(13, leftX + 100 * 3, topY, 128, 128);
-    TextureManager::Instance()->drawCard(13, leftX + 100 * 4, topY, 128, 128);
-    TextureManager::Instance()->drawCard(13, leftX + 100 * 5, topY, 128, 128);
-    TextureManager::Instance()->drawCard(13, leftX + 100 * 6, topY, 128, 128);
-    for (int i = 0; i < NUM_COLUMNS; i++) {
-        for (int j = 0; j < cardStacks[i].size(); j++) {
-            TextureManager::Instance()->drawCard(cardStacks[i][j], leftX + 100 * i, topY + 150 + 20 * j, 128, 128);
+    TextureManager::Instance()->drawCard(27, &backDeckRect);
+    // TextureManager::Instance()->drawCard(0, &frontDeckRect);
+    for (int i = 0; i < 4; i++) {
+        TextureManager::Instance()->drawCard(cardsTopCompleted[i], &completedRects[i]);
+    }
+    for (int i = 0; i < NUM_STACKS; i++) {
+        for (int j = 0; j < cardsStacks[i].size(); j++) {
+            SDL_Rect cardRect(stacksRects[i]);
+            cardRect.y += j * 20;
+            int card = numCardsStacksHidden[i] > j ? 27 : cardsStacks[i][j];
+            TextureManager::Instance()->drawCard(card, &cardRect);
         }
     }
-    if (movingCard != -1) {
-        TextureManager::Instance()->drawCard(movingCard, movingCardX, movingCardY, 128, 128);
+    if (movingCard.card != -1) {
+        TextureManager::Instance()->drawCard(movingCard.card, &movingCardRect);
     }
 }
 
 void Solitaire::mouseDown(int mouseX, int mouseY) 
 {
-    int leftX = -NUM_COLUMNS * 100 / 2;
-    int topY = (-150 - NUM_COLUMNS * 20) / 2;
-    for (int i = 0; i < NUM_COLUMNS; i++) {
-        for (int j = cardStacks[i].size() - 1; j >= 0; j--) {
-            int x = leftX + 100 * i;
-            int y = topY + 150 + 20 * j;
-            if (isMouseInside(mouseX, mouseY, leftX + 100 * i, topY + 150 + 20 * j, 84, 128)) {
-                movingCard = cardStacks[i][j];
-                movingCardX = leftX + 100 * i;
-                movingCardY = topY + 150 + 20 * j;
-                movingCardOffsetX = (leftX + 100 * i) - mouseX;
-                movingCardOffsetY = (topY + 150 + 20 * j) - mouseY;
+    for (int i = 0; i < NUM_STACKS; i++) {
+        for (int j = cardsStacks[i].size() - 1; j >= numCardsStacksHidden[i]; j--) {
+            SDL_Rect cardRect(stacksRects[i]);
+            cardRect.y += j * 20;
+            if (isMouseInsideRect(mouseX, mouseY, &cardRect)) {
+                movingCard.card = cardsStacks[i][j];
+                movingCard.stack = i;
+                cardsStacks[i].pop_back();
+                movingCardRect = SDL_Rect{topLeft.x + 100 * i, topLeft.y + 150 + 20 * j, 84, 128};
+                movingCard.mouseOffset.x = (topLeft.x + 100 * i) - mouseX;
+                movingCard.mouseOffset.y = (topLeft.y + 150 + 20 * j) - mouseY;
                 return;
             }
         }
@@ -59,17 +60,64 @@ void Solitaire::mouseDown(int mouseX, int mouseY)
 
 void Solitaire::mouseUp(int mouseX, int mouseY)
 {
-    movingCard = -1;
+    if (movingCard.card == -1) return;
+
+    for (int i = 0; i < 4; i++) {
+        bool mouseInside = isMouseInsideRect(mouseX, mouseY, &completedRects[i]);
+        if (mouseInside) {
+            cardsTopCompleted[i] = movingCard.card;
+            movingCard.card = -1;
+            return;
+        }
+    }
+    for (int i = 0; i < NUM_STACKS; i++) {
+        bool mouseInside = isMouseInsideRect(mouseX, mouseY, &stacksRects[i]);
+        if (mouseInside && movingCard.stack != i) {
+
+        }
+    }
+    cardsStacks[movingCard.stack].push_back(movingCard.card);
+    movingCard.card = -1;
 }
 
 void Solitaire::mouseDrag(int mouseX, int mouseY) 
 {
-    movingCardX = mouseX + movingCardOffsetX;
-    movingCardY = mouseY + movingCardOffsetY;
+    movingCardRect.x = mouseX + movingCard.mouseOffset.x;
+    movingCardRect.y = mouseY + movingCard.mouseOffset.y;
 }
 
-bool Solitaire::isMouseInside(int mouseX, int mouseY, int x, int y, int w, int h)
+void Solitaire::resetBoard()
 {
-    bool insideX = mouseX >= x - w / 2 && mouseX <= x + w / 2;
-    return insideX && mouseY >= y - h / 2 && mouseY <= y + h / 2;
+    movingCard.card = -1;
+    for (int i = 0; i < 4; i++) {
+        cardsTopCompleted[i] = 13;
+    }
+    cardsDeck = std::vector<int>(52);
+    for (int i = 0; i < 52; i++) {
+        cardsDeck[i] = (i / 13) * 14 + i % 13;
+    }
+    shuffle(cardsDeck);
+    for (int i = 0; i < NUM_STACKS; i++) {
+        numCardsStacksHidden[i] = i;
+        cardsStacks[i] = std::vector<int>(i + 1);
+        for (int j = 0; j < i + 1; j++) {
+            cardsStacks[i][j] = cardsDeck.back();
+            cardsDeck.pop_back();
+        }
+    }
+}
+
+void Solitaire::shuffle(std::vector<int>& vector) {
+    for (int i = vector.size() - 1; i >= 1; i--) {
+        int j = rand() % i;
+        int tmp = vector[j];
+        vector[j] = vector[i];
+        vector[i] = tmp;
+    }
+}
+
+bool Solitaire::isMouseInsideRect(int mouseX, int mouseY, SDL_Rect* rect)
+{
+    bool insideX = mouseX >= rect->x - rect->w / 2 && mouseX <= rect->x + rect->w / 2;
+    return insideX && mouseY >= rect->y - rect->h / 2 && mouseY <= rect->y + rect->h / 2;
 }
