@@ -7,31 +7,33 @@ Solitaire::Solitaire()
     resetBoard();
 
     topLeft = SDL_Point{-NUM_STACKS * 100 / 2, (-150 - NUM_STACKS * 20) / 2};
-    backDeckRect = SDL_Rect{topLeft.x, topLeft.y, 84, 128};
-    frontDeckRect = SDL_Rect{topLeft.x + 100, topLeft.y, 84, 128};
+    backDeckRect = SDL_Rect{topLeft.x, topLeft.y, CARD_WIDTH, CARD_HEIGHT};
+    frontDeckRect = SDL_Rect{topLeft.x + 100, topLeft.y, CARD_WIDTH, CARD_HEIGHT};
     for (int i = 0; i < 4; i++) {
-        completedRects[i] = SDL_Rect{topLeft.x + 100 * (3 + i), topLeft.y, 84, 128};
+        completedRects[i] = SDL_Rect{topLeft.x + 100 * (3 + i), topLeft.y, CARD_WIDTH, CARD_HEIGHT};
     }
     for (int i = 0; i < NUM_STACKS; i++) {
-        stacksRects[i] = SDL_Rect{topLeft.x + 100 * i, topLeft.y + 150, 84, 128};
+        stacksRectsBase[i] = SDL_Rect{topLeft.x + 100 * i, topLeft.y + 150, CARD_WIDTH, CARD_HEIGHT};
+        stacksRects[i] = std::vector<SDL_Rect>(i + 1);
+        for (int j = 0; j < i + 1; j++) {
+            stacksRects[i][j] = SDL_Rect(stacksRectsBase[i]);
+            stacksRects[i][j].y += j * 20;
+        }
     }
-
     movingCard.card = -1;
 }
 
 void Solitaire::drawBoard()
 {
-    TextureManager::Instance()->drawCard(27, &backDeckRect);
+    TextureManager::Instance()->drawCard(CARD_BACK, &backDeckRect);
     // TextureManager::Instance()->drawCard(0, &frontDeckRect);
     for (int i = 0; i < 4; i++) {
         TextureManager::Instance()->drawCard(cardsTopCompleted[i], &completedRects[i]);
     }
     for (int i = 0; i < NUM_STACKS; i++) {
         for (int j = 0; j < cardsStacks[i].size(); j++) {
-            SDL_Rect cardRect(stacksRects[i]);
-            cardRect.y += j * 20;
-            int card = numCardsStacksHidden[i] > j ? 27 : cardsStacks[i][j];
-            TextureManager::Instance()->drawCard(card, &cardRect);
+            int card = numCardsStacksHidden[i] > j ? CARD_BACK : cardsStacks[i][j];
+            TextureManager::Instance()->drawCard(card, &stacksRects[i][j]);
         }
     }
     if (movingCard.card != -1) {
@@ -42,14 +44,13 @@ void Solitaire::drawBoard()
 void Solitaire::mouseDown(int mouseX, int mouseY) 
 {
     for (int i = 0; i < NUM_STACKS; i++) {
-        for (int j = cardsStacks[i].size() - 1; j >= numCardsStacksHidden[i]; j--) {
-            SDL_Rect cardRect(stacksRects[i]);
-            cardRect.y += j * 20;
-            if (isMouseInsideRect(mouseX, mouseY, &cardRect)) {
+        // for (int j = cardsStacks[i].size() - 1; j >= numCardsStacksHidden[i]; j--) {
+        for (int j = cardsStacks[i].size() - 1; j == cardsStacks[i].size() - 1; j--) {
+            if (isMouseInsideRect(mouseX, mouseY, &stacksRects[i][j])) {
                 movingCard.card = cardsStacks[i][j];
                 movingCard.stack = i;
                 cardsStacks[i].pop_back();
-                movingCardRect = SDL_Rect{topLeft.x + 100 * i, topLeft.y + 150 + 20 * j, 84, 128};
+                movingCardRect = SDL_Rect{topLeft.x + 100 * i, topLeft.y + 150 + 20 * j, CARD_WIDTH, CARD_HEIGHT};
                 movingCard.mouseOffset.x = (topLeft.x + 100 * i) - mouseX;
                 movingCard.mouseOffset.y = (topLeft.y + 150 + 20 * j) - mouseY;
                 return;
@@ -63,17 +64,35 @@ void Solitaire::mouseUp(int mouseX, int mouseY)
     if (movingCard.card == -1) return;
 
     for (int i = 0; i < 4; i++) {
-        bool mouseInside = isMouseInsideRect(mouseX, mouseY, &completedRects[i]);
-        if (mouseInside) {
+        if (isMouseInsideRect(mouseX, mouseY, &completedRects[i]) &&
+            cardCanBePlacedOnCompleted(movingCard.card, i)) 
+        {
             cardsTopCompleted[i] = movingCard.card;
+            int cardsHidden = numCardsStacksHidden[movingCard.stack];
+            if (cardsHidden > 0 && cardsStacks[movingCard.stack].size() == cardsHidden) {
+                numCardsStacksHidden[movingCard.stack]--;
+            }
             movingCard.card = -1;
             return;
         }
     }
     for (int i = 0; i < NUM_STACKS; i++) {
-        bool mouseInside = isMouseInsideRect(mouseX, mouseY, &stacksRects[i]);
-        if (mouseInside && movingCard.stack != i) {
+        if (isMouseInsideRect(mouseX, mouseY, &stacksRects[i].back()) && movingCard.stack != i &&
+            cardCanBePlacedOnStack(movingCard.card, i))
+        {
+            stacksRects[movingCard.stack].pop_back();
 
+            SDL_Rect stackCardRect(stacksRectsBase[i]);
+            stackCardRect.y += cardsStacks[i].size() * 20;
+            stacksRects[i].push_back(stackCardRect);
+
+            cardsStacks[i].push_back(movingCard.card);
+            int cardsHidden = numCardsStacksHidden[movingCard.stack];
+            if (cardsHidden > 0 && cardsStacks[movingCard.stack].size() == cardsHidden) {
+                numCardsStacksHidden[movingCard.stack]--;
+            }
+            movingCard.card = -1;
+            return;
         }
     }
     cardsStacks[movingCard.stack].push_back(movingCard.card);
@@ -90,7 +109,7 @@ void Solitaire::resetBoard()
 {
     movingCard.card = -1;
     for (int i = 0; i < 4; i++) {
-        cardsTopCompleted[i] = 13;
+        cardsTopCompleted[i] = CARD_EMPTY;
     }
     cardsDeck = std::vector<int>(52);
     for (int i = 0; i < 52; i++) {
@@ -107,13 +126,32 @@ void Solitaire::resetBoard()
     }
 }
 
-void Solitaire::shuffle(std::vector<int>& vector) {
+void Solitaire::shuffle(std::vector<int>& vector) 
+{
     for (int i = vector.size() - 1; i >= 1; i--) {
         int j = rand() % i;
         int tmp = vector[j];
         vector[j] = vector[i];
         vector[i] = tmp;
     }
+}
+
+bool Solitaire::cardCanBePlacedOnStack(int card, int stack) 
+{
+    int card2 = cardsStacks[stack].back();
+    bool oppositeColor = card / 28 != card2 / 28;
+    bool numberJustUnder = card % 14 == (card2 % 14) - 1;
+    return oppositeColor && numberJustUnder;
+}
+
+bool Solitaire::cardCanBePlacedOnCompleted(int card, int stack) 
+{
+    int card2 = cardsTopCompleted[stack];
+    if (card2 == CARD_EMPTY) return card % 14 == 0;
+
+    bool sameSuit = card / 14 == card2 / 14;
+    bool numberJustOver = card % 14 == (card2 % 14) + 1;
+    return sameSuit && numberJustOver;
 }
 
 bool Solitaire::isMouseInsideRect(int mouseX, int mouseY, SDL_Rect* rect)

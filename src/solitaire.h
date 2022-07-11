@@ -7,6 +7,11 @@
 #include "textureManager.h"
 
 const int NUM_STACKS = 7;
+const int CARD_WIDTH = 84;
+const int CARD_HEIGHT = 120;
+
+const int CARD_EMPTY = 13;
+const int CARD_BACK = 27;
 
 struct MovingCard {
     int card;
@@ -25,6 +30,8 @@ public:
 private:
     void resetBoard();
     void shuffle(std::vector<int>& vec);
+    bool cardCanBePlacedOnStack(int card, int stack);
+    bool cardCanBePlacedOnCompleted(int card, int stack);
     bool isMouseInsideRect(int mouseX, int mouseY, SDL_Rect* rect);
 
     SDL_Point topLeft;
@@ -32,11 +39,12 @@ private:
     SDL_Rect backDeckRect;
     SDL_Rect frontDeckRect;
     SDL_Rect completedRects[4];
-    SDL_Rect stacksRects[NUM_STACKS];
+    SDL_Rect stacksRectsBase[NUM_STACKS];
+    std::vector<SDL_Rect> stacksRects[NUM_STACKS];
 
+    int numCardsStacksHidden[NUM_STACKS];
     MovingCard movingCard;
     int cardsTopCompleted[4];
-    int numCardsStacksHidden[NUM_STACKS];
     std::vector<int> cardsDeck;
     std::vector<int> cardsStacks[NUM_STACKS];
 };
