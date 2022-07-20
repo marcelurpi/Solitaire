@@ -27,6 +27,8 @@ public:
     void mouseDown(int mouseX, int mouseY);
     void mouseUp(int mouseX, int mouseY);
     void mouseDrag(int mouseX, int mouseY);
+    void keyDown(SDL_Keysym keysym);
+    void keyUp(SDL_Keysym keysym);
 private:
     void resetBoard();
     void shuffle(std::vector<int>& vec);
@@ -42,6 +44,8 @@ private:
     SDL_Rect stacksRectsBase[NUM_STACKS];
     std::vector<SDL_Rect> stacksRects[NUM_STACKS];
 
+    bool spacePressed;
+    int deckIndex;
     int numCardsStacksHidden[NUM_STACKS];
     MovingCard movingCard;
     int cardsTopCompleted[4];

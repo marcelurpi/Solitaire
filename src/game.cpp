@@ -1,6 +1,7 @@
 
 #include "game.h"
 #include <stdio.h>
+#include <iostream>
 
 Game::Game() : renderer(nullptr)
 {
@@ -59,11 +60,20 @@ bool Game::mainLoop()
         {
             solitaire->mouseDrag(event.motion.x - WINDOW_WIDTH / 2, event.motion.y - WINDOW_HEIGHT / 2);
         }
+        else if (event.type == SDL_KEYDOWN)
+        {
+            solitaire->keyDown(event.key.keysym);
+        }
+        else if (event.type == SDL_KEYUP)
+        {
+            solitaire->keyUp(event.key.keysym);
+        }
     }
     SDL_SetRenderDrawColor(renderer, 0x00, 0xAA, 0x55, 255);
     SDL_RenderClear(renderer);
     solitaire->drawBoard();
     SDL_RenderPresent(renderer);
+
     return true;
 }
 

@@ -14,7 +14,7 @@ class TextureManager
 public:
     static TextureManager* Instance();
     void init(int windowWidth, int windowHeight, SDL_Renderer* renderer);
-    void drawCard(int card, SDL_Rect* rect);
+    void drawCard(int card, SDL_Rect* rect, bool transparent);
 private:
     static TextureManager* instance;
     int windowWidth;

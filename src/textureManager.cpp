@@ -15,7 +15,7 @@ void TextureManager::init(int windowWidth, int windowHeight, SDL_Renderer* rende
     this->windowWidth = windowWidth;
     this->windowHeight = windowHeight;
     this->renderer = renderer;
-    std::string path = "resources/cardsTilesheet.png";
+    std::string path = "res/cardsTilesheet.png";
     SDL_Texture* texture = IMG_LoadTexture(renderer, path.c_str());
 	if (texture == NULL)
 	{
@@ -25,11 +25,17 @@ void TextureManager::init(int windowWidth, int windowHeight, SDL_Renderer* rende
     cardsTilesheetTexture = texture;
 }
 
-void TextureManager::drawCard(int card, SDL_Rect* rect)
+void TextureManager::drawCard(int card, SDL_Rect* rect, bool transparent)
 {
     SDL_Rect srcrect{(card % 14) * 64, (card / 14) * 64, 64, 64};
     int left = windowWidth / 2 - CARD_TEXTURE_SIZE / 2 + rect->x;
     int top = windowHeight / 2 - CARD_TEXTURE_SIZE / 2 + rect->y;
-    SDL_Rect dstrect{ left, top, CARD_TEXTURE_SIZE, CARD_TEXTURE_SIZE};
+    SDL_Rect dstrect{left, top, CARD_TEXTURE_SIZE, CARD_TEXTURE_SIZE};
+    if (transparent) {
+        SDL_SetTextureAlphaMod(cardsTilesheetTexture, 128);
+    }
     SDL_RenderCopy(renderer, cardsTilesheetTexture, &srcrect, &dstrect);
+    if (transparent) {
+        SDL_SetTextureAlphaMod(cardsTilesheetTexture, 255);
+    }
 }
