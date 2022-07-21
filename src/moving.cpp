@@ -31,13 +31,25 @@ int MovingStack::getCardAt(int index)
     return cards[index].card;
 }
 
+MovingFrom MovingStack::getMovingFrom()
+{
+    return movingFrom;
+}
+
+Completed* MovingStack::getFromCompleted()
+{
+    return fromCompleted;
+}
+
 Stack* MovingStack::getFromStack()
 {
     return fromStack;
 }
 
-void MovingStack::setFromStack(Stack* stack)
+void MovingStack::setMovingFrom(MovingFrom movingFrom, Completed* completed, Stack* stack)
 {
+    this->movingFrom = movingFrom;
+    fromCompleted = completed;
     fromStack = stack;
 }
 

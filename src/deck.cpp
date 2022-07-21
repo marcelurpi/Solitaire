@@ -40,6 +40,13 @@ int Deck::popCard()
     return card;
 }
 
+void Deck::returnCard()
+{
+    index++;
+    cards.insert(cards.begin() + index, moving->getCardAt(0));
+    moving->clear();
+}
+
 bool Deck::mouseDown(int mouseX, int mouseY)
 {
     if (isMouseInsideRect(mouseX, mouseY, &backDeckRect)) {
@@ -52,19 +59,11 @@ bool Deck::mouseDown(int mouseX, int mouseY)
         moving->addMovingCard(movingCard);
         cards.erase(cards.begin() + index);
         index--;
-        moving->setFromStack(nullptr);
+        moving->setMovingFrom(MovingFrom::Deck, nullptr, nullptr);
         moving->updatePosition(frontDeckRect.x, frontDeckRect.y);
         return true;
     }
     return false;
-}
-
-bool Deck::mouseUp(int mouseX, int mouseY)
-{
-    index++;
-    cards.insert(cards.begin() + index, moving->getCardAt(0));
-    moving->clear();
-    return true;
 }
 
 void Deck::shuffle()
@@ -75,10 +74,4 @@ void Deck::shuffle()
         cards[j] = cards[i];
         cards[i] = tmp;
     }
-}
-
-bool Deck::isMouseInsideRect(int mouseX, int mouseY, SDL_Rect* rect)
-{
-    bool insideX = mouseX >= rect->x - rect->w / 2 && mouseX <= rect->x + rect->w / 2;
-    return insideX && mouseY >= rect->y - rect->h / 2 && mouseY <= rect->y + rect->h / 2;
 }

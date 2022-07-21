@@ -54,7 +54,7 @@ bool Stack::mouseDown(int mouseX, int mouseY)
             for (int k = j; k < cardsStacksSize; k++) {
                 cards.pop_back();
             }
-            moving->setFromStack(this);
+            moving->setMovingFrom(MovingFrom::Stack, nullptr, this);
             moving->updatePosition(cardRects[j].x, cardRects[j].y);
             return true;
         }
@@ -89,10 +89,4 @@ bool Stack::cardCanBePlacedOnStack(int card)
     bool oppositeColor = card / 28 != card2 / 28;
     bool numberJustUnder = card % 14 == (card2 % 14) - 1;
     return oppositeColor && numberJustUnder;
-}
-
-bool Stack::isMouseInsideRect(int mouseX, int mouseY, SDL_Rect* rect)
-{
-    bool insideX = mouseX >= rect->x - rect->w / 2 && mouseX <= rect->x + rect->w / 2;
-    return insideX && mouseY >= rect->y - rect->h / 2 && mouseY <= rect->y + rect->h / 2;
 }

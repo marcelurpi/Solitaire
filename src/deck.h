@@ -4,6 +4,7 @@
 
 #include "textureManager.h"
 #include "moving.h"
+#include "utils.h"
 #include <vector>
 
 class Deck
@@ -14,11 +15,10 @@ public:
     void draw();
     void reset();
     int popCard();
+    void returnCard();
     bool mouseDown(int mouseX, int mouseY);
-    bool mouseUp(int mouseX, int mouseY);
 private:
     void shuffle();
-    bool isMouseInsideRect(int mouseX, int mouseY, SDL_Rect* rect);
 
     SDL_Rect backDeckRect;
     SDL_Rect frontDeckRect;

@@ -71,7 +71,7 @@ bool Game::mainLoop()
     }
     SDL_SetRenderDrawColor(renderer, 0x00, 0xAA, 0x55, 255);
     SDL_RenderClear(renderer);
-    solitaire->drawBoard();
+    solitaire->draw();
     SDL_RenderPresent(renderer);
 
     return true;

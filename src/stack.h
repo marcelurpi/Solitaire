@@ -4,6 +4,7 @@
 
 #include <vector>
 #include "moving.h"
+#include "utils.h"
 
 class MovingStack;
 
@@ -22,7 +23,6 @@ public:
     bool mouseUp(int mouseX, int mouseY);
 private:
     bool cardCanBePlacedOnStack(int card);
-    bool isMouseInsideRect(int mouseX, int mouseY, SDL_Rect* rect);
 
     int index;
     MovingStack* moving;

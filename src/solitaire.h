@@ -4,30 +4,27 @@
 
 #include <vector>
 #include <time.h>
-#include "stack.h"
 #include "deck.h"
+#include "stack.h"
+#include "completed.h"
+#include "utils.h"
 
 class Solitaire 
 {
 public:
     Solitaire();
-    void drawBoard();
+    void draw();
     void mouseDown(int mouseX, int mouseY);
     void mouseUp(int mouseX, int mouseY);
     void mouseDrag(int mouseX, int mouseY);
     void keyDown(SDL_Keysym keysym);
     void keyUp(SDL_Keysym keysym);
 private:
-    void resetBoard();
-    bool cardCanBePlacedOnCompleted(int card, int stack);
-    bool isMouseInsideRect(int mouseX, int mouseY, SDL_Rect* rect);
-
-    SDL_Rect completedRects[4];
-
-    int cardsTopCompleted[4];
+    void reset();
 
     Deck deck;
     Stack stacks[NUM_STACKS];
+    Completed completed[4];
     MovingStack movingStack;
 };
 
