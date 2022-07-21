@@ -2,11 +2,10 @@
 #include "solitaire.h"
 #include <iostream>
 
-Solitaire::Solitaire() : deckIndex(-1), spacePressed(false)
+Solitaire::Solitaire()
 {
     srand(2727); //srand(time(0));
-    resetBoard();
-
+    
     topLeft = SDL_Point{-NUM_STACKS * 100 / 2, (-150 - NUM_STACKS * 20) / 2};
     backDeckRect = SDL_Rect{topLeft.x, topLeft.y, CARD_WIDTH, CARD_HEIGHT};
     frontDeckRect = SDL_Rect{topLeft.x + 100, topLeft.y, CARD_WIDTH, CARD_HEIGHT};
@@ -15,13 +14,9 @@ Solitaire::Solitaire() : deckIndex(-1), spacePressed(false)
     }
     for (int i = 0; i < NUM_STACKS; i++) {
         stacksRectsBase[i] = SDL_Rect{topLeft.x + 100 * i, topLeft.y + 150, CARD_WIDTH, CARD_HEIGHT};
-        stacksRects[i] = std::vector<SDL_Rect>(i + 1);
-        for (int j = 0; j < i + 1; j++) {
-            stacksRects[i][j] = SDL_Rect(stacksRectsBase[i]);
-            stacksRects[i][j].y += j * 20;
-        }
     }
-    movingCard.card = -1;
+
+    resetBoard();
 }
 
 void Solitaire::drawBoard()
@@ -35,12 +30,17 @@ void Solitaire::drawBoard()
         TextureManager::Instance()->drawCard(cardsDeck[deckIndex], &frontDeckRect, false);
     }
     for (int i = 0; i < 4; i++) {
-        TextureManager::Instance()->drawCard(cardsTopCompleted[i], &completedRects[i], false);
+        bool transparent = cardsTopCompleted[i] == CARD_EMPTY;
+        TextureManager::Instance()->drawCard(cardsTopCompleted[i], &completedRects[i], transparent);
     }
     for (int i = 0; i < NUM_STACKS; i++) {
         if (spacePressed) {
-            for (int j = 0; j < stacksRects[i].size(); j++) {
-                TextureManager::Instance()->drawCard(CARD_EMPTY, &stacksRects[i][j], false);
+            if (cardsStacks[i].size() == 0) {
+                TextureManager::Instance()->drawCard(CARD_EMPTY, &stacksRectsBase[i], true);
+            } else {
+                for (int j = 0; j < cardsStacks[i].size(); j++) {
+                    TextureManager::Instance()->drawCard(CARD_EMPTY, &stacksRects[i][j], false);
+                }
             }
         } else {
             for (int j = 0; j < cardsStacks[i].size(); j++) {
@@ -49,8 +49,10 @@ void Solitaire::drawBoard()
             }
         }
     }
-    if (movingCard.card != -1) {
-        TextureManager::Instance()->drawCard(movingCard.card, &movingCardRect, false);
+    for (int i = 0; i < movingStack.cards.size(); i++) {
+        SDL_Rect movingStackCardRect(movingCardRect);
+        movingStackCardRect.y += i * 20;
+        TextureManager::Instance()->drawCard(movingStack.cards[i].card, &movingStackCardRect, false);
     }
 }
 
@@ -61,22 +63,29 @@ void Solitaire::mouseDown(int mouseX, int mouseY)
         return;
     }
     if (isMouseInsideRect(mouseX, mouseY, &frontDeckRect) && deckIndex != -1) {
-        movingCard.card = cardsDeck[deckIndex];
-        movingCard.stack = -1;
+        SDL_Point mouseOffset{frontDeckRect.x - mouseX, frontDeckRect.y - mouseY};
+        MovingCard movingCard{cardsDeck[deckIndex], mouseOffset};
+        movingStack.cards.push_back(movingCard);
         cardsDeck.erase(cardsDeck.begin() + deckIndex);
         deckIndex--;
+        movingStack.stack = -1;
+        movingCardRect = SDL_Rect{frontDeckRect.x, frontDeckRect.y, CARD_WIDTH, CARD_HEIGHT};
         return;
     }
     for (int i = 0; i < NUM_STACKS; i++) {
-        // for (int j = cardsStacks[i].size() - 1; j >= numCardsStacksHidden[i]; j--) {
-        for (int j = cardsStacks[i].size() - 1; j == cardsStacks[i].size() - 1; j--) {
+        for (int j = cardsStacks[i].size() - 1; j >= numCardsStacksHidden[i]; j--) {
             if (isMouseInsideRect(mouseX, mouseY, &stacksRects[i][j])) {
-                movingCard.card = cardsStacks[i][j];
-                movingCard.stack = i;
-                cardsStacks[i].pop_back();
-                movingCardRect = SDL_Rect{topLeft.x + 100 * i, topLeft.y + 150 + 20 * j, CARD_WIDTH, CARD_HEIGHT};
-                movingCard.mouseOffset.x = (topLeft.x + 100 * i) - mouseX;
-                movingCard.mouseOffset.y = (topLeft.y + 150 + 20 * j) - mouseY;
+                for (int k = j; k < cardsStacks[i].size(); k++) {
+                    SDL_Point mouseOffset{stacksRects[i][k].x - mouseX, stacksRects[i][k].y - mouseY};
+                    MovingCard movingCard{cardsStacks[i][k], mouseOffset};
+                    movingStack.cards.push_back(movingCard);
+                }
+                int cardsStacksSize = cardsStacks[i].size();
+                for (int k = j; k < cardsStacksSize; k++) {
+                    cardsStacks[i].pop_back();
+                }
+                movingStack.stack = i;
+                movingCardRect = SDL_Rect{stacksRects[i][j].x, stacksRects[i][j].y, CARD_WIDTH, CARD_HEIGHT};
                 return;
             }
         }
@@ -85,65 +94,79 @@ void Solitaire::mouseDown(int mouseX, int mouseY)
 
 void Solitaire::mouseUp(int mouseX, int mouseY)
 {
-    if (movingCard.card == -1) return;
+    if (movingStack.cards.size() == 0) return;
 
     for (int i = 0; i < 4; i++) {
         if (isMouseInsideRect(mouseX, mouseY, &completedRects[i]) &&
-            cardCanBePlacedOnCompleted(movingCard.card, i)) 
+            movingStack.cards.size() == 1 &&
+            cardCanBePlacedOnCompleted(movingStack.cards[0].card, i)) 
         {
-            cardsTopCompleted[i] = movingCard.card;
+            cardsTopCompleted[i] = movingStack.cards[0].card;
 
-            if (movingCard.stack != -1 && numCardsStacksHidden[movingCard.stack] != 0) {
-                stacksRects[movingCard.stack].pop_back();
-                int cardsHidden = numCardsStacksHidden[movingCard.stack];
-                if (cardsHidden > 0 && cardsStacks[movingCard.stack].size() == cardsHidden) {
-                    numCardsStacksHidden[movingCard.stack]--;
+            if (movingStack.stack != -1) {
+                stacksRects[movingStack.stack].pop_back();
+                int cardsHidden = numCardsStacksHidden[movingStack.stack];
+                if (cardsHidden != 0 && cardsStacks[movingStack.stack].size() == cardsHidden) {
+                    numCardsStacksHidden[movingStack.stack]--;
                 }
             }
             
-            movingCard.card = -1;
+            movingStack.cards.pop_back();
             return;
         }
     }
     for (int i = 0; i < NUM_STACKS; i++) {
-        bool clickingValidStack = isMouseInsideRect(mouseX, mouseY, &stacksRects[i].back()) && movingCard.stack != i &&
-            cardCanBePlacedOnStack(movingCard.card, i);
+        bool clickingValidStack = isMouseInsideRect(mouseX, mouseY, &stacksRects[i].back()) && movingStack.stack != i &&
+            cardCanBePlacedOnStack(movingStack.cards[0].card, i);
         bool clickingEmptyStack = isMouseInsideRect(mouseX, mouseY, &stacksRectsBase[i]) && 
-            cardsStacks[i].size() == 0 && (movingCard.card % 14) == 12;
+            cardsStacks[i].size() == 0 && (movingStack.cards[0].card % 14) == 12;
         if (clickingValidStack || clickingEmptyStack)
         {
-            if (movingCard.stack != -1) {
-                stacksRects[movingCard.stack].pop_back();
-            }
-
-            SDL_Rect stackCardRect(stacksRectsBase[i]);
-            stackCardRect.y += cardsStacks[i].size() * 20;
-            stacksRects[i].push_back(stackCardRect);
-
-            cardsStacks[i].push_back(movingCard.card);
-            if (movingCard.stack != -1 && numCardsStacksHidden[movingCard.stack] != 0) {
-                int cardsHidden = numCardsStacksHidden[movingCard.stack];
-                if (cardsHidden > 0 && cardsStacks[movingCard.stack].size() == cardsHidden) {
-                    numCardsStacksHidden[movingCard.stack]--;
+            if (movingStack.stack != -1) {
+                for (int j = 0; j < movingStack.cards.size(); j++) {
+                    stacksRects[movingStack.stack].pop_back();
                 }
             }
-            movingCard.card = -1;
+
+            for (int j = 0; j < movingStack.cards.size(); j++) {
+                SDL_Rect stackCardRect(stacksRectsBase[i]);
+                stackCardRect.y += cardsStacks[i].size() * 20;
+                stacksRects[i].push_back(stackCardRect);
+                cardsStacks[i].push_back(movingStack.cards[j].card);
+            }
+        
+            if (movingStack.stack != -1) {
+                int cardsHidden = numCardsStacksHidden[movingStack.stack];
+                if (cardsHidden != 0 && cardsStacks[movingStack.stack].size() == cardsHidden) {
+                    numCardsStacksHidden[movingStack.stack]--;
+                }
+            }
+
+            while (movingStack.cards.size() != 0) {
+                movingStack.cards.pop_back();
+            }
             return;
         }
     }
-    if (movingCard.stack == -1) {
+    if (movingStack.stack == -1) {
         deckIndex++;
-        cardsDeck.insert(cardsDeck.begin() + deckIndex, movingCard.card);
+        cardsDeck.insert(cardsDeck.begin() + deckIndex, movingStack.cards[0].card);
     } else {
-        cardsStacks[movingCard.stack].push_back(movingCard.card);
+        for (int i = 0; i < movingStack.cards.size(); i++) {
+            cardsStacks[movingStack.stack].push_back(movingStack.cards[i].card);
+        }
     }
-    movingCard.card = -1;
+    while (movingStack.cards.size() != 0) {
+        movingStack.cards.pop_back();
+    }
 }
 
 void Solitaire::mouseDrag(int mouseX, int mouseY) 
 {
-    movingCardRect.x = mouseX + movingCard.mouseOffset.x;
-    movingCardRect.y = mouseY + movingCard.mouseOffset.y;
+    if (movingStack.cards.size() != 0) {
+        movingCardRect.x = mouseX + movingStack.cards[0].mouseOffset.x;
+        movingCardRect.y = mouseY + movingStack.cards[0].mouseOffset.y;
+    }
 }
 
 void Solitaire::keyDown(SDL_Keysym keysym)
@@ -158,14 +181,20 @@ void Solitaire::keyUp(SDL_Keysym keysym)
     if (keysym.sym == SDLK_SPACE) {
         spacePressed = false;
     }
+    if (keysym.sym == SDLK_r) {
+        srand(2727);
+        resetBoard();
+    }
 }
 
 void Solitaire::resetBoard()
 {
-    movingCard.card = -1;
+    movingStack.stack = -1;
+    movingStack.cards = std::vector<MovingCard>(0);
     for (int i = 0; i < 4; i++) {
         cardsTopCompleted[i] = CARD_EMPTY;
     }
+    deckIndex = -1;
     cardsDeck = std::vector<int>(52);
     for (int i = 0; i < 52; i++) {
         cardsDeck[i] = (i / 13) * 14 + i % 13;
@@ -177,6 +206,11 @@ void Solitaire::resetBoard()
         for (int j = 0; j < i + 1; j++) {
             cardsStacks[i][j] = cardsDeck.back();
             cardsDeck.pop_back();
+        }
+        stacksRects[i] = std::vector<SDL_Rect>(i + 1);
+        for (int j = 0; j < i + 1; j++) {
+            stacksRects[i][j] = SDL_Rect(stacksRectsBase[i]);
+            stacksRects[i][j].y += j * 20;
         }
     }
 }

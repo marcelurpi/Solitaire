@@ -15,8 +15,12 @@ const int CARD_BACK = 27;
 
 struct MovingCard {
     int card;
-    int stack;
     SDL_Point mouseOffset;
+};
+
+struct MovingStack {
+    int stack;
+    std::vector<MovingCard> cards;
 };
 
 class Solitaire 
@@ -47,7 +51,7 @@ private:
     bool spacePressed;
     int deckIndex;
     int numCardsStacksHidden[NUM_STACKS];
-    MovingCard movingCard;
+    MovingStack movingStack;
     int cardsTopCompleted[4];
     std::vector<int> cardsDeck;
     std::vector<int> cardsStacks[NUM_STACKS];
