@@ -7,7 +7,12 @@
 #include <string>
 #include <map>
 
+const int CARD_WIDTH = 84;
+const int CARD_HEIGHT = 120;
 const int CARD_TEXTURE_SIZE = 128;
+
+const int CARD_EMPTY = 13;
+const int CARD_BACK = 27;
 
 class TextureManager 
 {
