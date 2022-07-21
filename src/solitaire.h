@@ -5,6 +5,7 @@
 #include <vector>
 #include <time.h>
 #include "stack.h"
+#include "deck.h"
 
 class Solitaire 
 {
@@ -18,20 +19,16 @@ public:
     void keyUp(SDL_Keysym keysym);
 private:
     void resetBoard();
-    void shuffle(std::vector<int>& vec);
     bool cardCanBePlacedOnCompleted(int card, int stack);
     bool isMouseInsideRect(int mouseX, int mouseY, SDL_Rect* rect);
 
-    SDL_Rect backDeckRect;
-    SDL_Rect frontDeckRect;
     SDL_Rect completedRects[4];
 
-    bool spacePressed;
-    int deckIndex;
-    MovingStack movingStack;
     int cardsTopCompleted[4];
-    std::vector<int> cardsDeck;
+
+    Deck deck;
     Stack stacks[NUM_STACKS];
+    MovingStack movingStack;
 };
 
 #endif // HEADER_SOLITAIRE
