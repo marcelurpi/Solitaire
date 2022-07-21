@@ -7,6 +7,8 @@
 #include <string>
 #include <map>
 
+const int NUM_STACKS = 7;
+
 const int CARD_WIDTH = 84;
 const int CARD_HEIGHT = 120;
 const int CARD_TEXTURE_SIZE = 128;

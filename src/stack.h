@@ -7,16 +7,16 @@
 
 class MovingStack;
 
+const int MAX_STACK_SIZE = NUM_STACKS - 1 + 13;
+
 class Stack {
 public:
     Stack();
     Stack(int baseX, int baseY, MovingStack* moving);
     void draw();
     void reset();
-    void resetRects();
     void setNumHiddenCards(int hidden);
     void addCard(int card);
-    void removeLastRect();
     void uncoverCardIfPossible();
     bool mouseDown(int mouseX, int mouseY);
     bool mouseUp(int mouseX, int mouseY);
@@ -26,8 +26,7 @@ private:
 
     int index;
     MovingStack* moving;
-    SDL_Rect baseCardRect;
-    std::vector<SDL_Rect> cardRects;
+    SDL_Rect cardRects[MAX_STACK_SIZE];
     int numHiddenCards;
     std::vector<int> cards;
 };

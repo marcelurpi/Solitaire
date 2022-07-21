@@ -6,7 +6,7 @@ Solitaire::Solitaire()
 {
     srand(2727); //srand(time(0));
     
-    SDL_Point topLeft{-NUM_STACKS * 100 / 2, (-150 - NUM_STACKS * 20) / 2};
+    SDL_Point topLeft{-NUM_STACKS * 100 / 2, -50 - (150 + NUM_STACKS * 20) / 2};
     backDeckRect = SDL_Rect{topLeft.x, topLeft.y, CARD_WIDTH, CARD_HEIGHT};
     frontDeckRect = SDL_Rect{topLeft.x + 100, topLeft.y, CARD_WIDTH, CARD_HEIGHT};
     for (int i = 0; i < 4; i++) {
@@ -75,7 +75,6 @@ void Solitaire::mouseUp(int mouseX, int mouseY)
             cardsTopCompleted[i] = movingStack.getCardAt(0);
 
             if (fromStack != nullptr) {
-                fromStack->removeLastRect();
                 fromStack->uncoverCardIfPossible();
             }
             
@@ -136,7 +135,6 @@ void Solitaire::resetBoard()
             stacks[i].addCard(cardsDeck.back());
             cardsDeck.pop_back();
         }
-        stacks[i].resetRects();
     }
 }
 

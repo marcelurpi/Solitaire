@@ -6,8 +6,6 @@
 #include <time.h>
 #include "stack.h"
 
-const int NUM_STACKS = 7;
-
 class Solitaire 
 {
 public:
