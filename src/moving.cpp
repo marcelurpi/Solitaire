@@ -18,6 +18,7 @@ void MovingStack::draw()
 void MovingStack::clear()
 {
     fromStack = nullptr;
+    fromCompleted = nullptr;
     cards.clear();
 }
 

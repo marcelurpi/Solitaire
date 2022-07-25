@@ -34,7 +34,7 @@ void Solitaire::mouseDown(int mouseX, int mouseY)
         return;
     }
     for (int i = 0; i < 4; i++) {
-        if(completed[i].mouseDown(mouseX, mouseY)) {
+        if (completed[i].mouseDown(mouseX, mouseY)) {
             return;
         }
     }
@@ -86,7 +86,6 @@ void Solitaire::keyDown(SDL_Keysym keysym)
 void Solitaire::keyUp(SDL_Keysym keysym)
 {
     if (keysym.sym == SDLK_r) {
-        srand(2727);
         reset();
     }
 }
@@ -99,7 +98,7 @@ void Solitaire::reset()
     }
     deck.reset();
     for (int i = 0; i < NUM_STACKS; i++) {
-
+        stacks[i].reset();
         stacks[i].setNumHiddenCards(i);
         for (int j = 0; j < i + 1; j++) {
             stacks[i].addCard(deck.popCard());

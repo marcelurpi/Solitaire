@@ -26,7 +26,7 @@ void Deck::draw()
 void Deck::reset()
 {
     index = -1;
-    cards.empty();
+    cards = std::vector<int>(52);
     for (int i = 0; i < 52; i++) {
         cards[i] = (i / 13) * 14 + i % 13;
     }
