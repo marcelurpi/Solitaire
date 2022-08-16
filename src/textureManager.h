@@ -4,6 +4,7 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 #include <string>
 #include <map>
 
@@ -22,11 +23,13 @@ public:
     static TextureManager* Instance();
     void init(int windowWidth, int windowHeight, SDL_Renderer* renderer);
     void drawCard(int card, SDL_Rect* rect, bool transparent);
+    void drawText(const std::string& text, int size, SDL_Point position);
 private:
     static TextureManager* instance;
     int windowWidth;
     int windowHeight;
     SDL_Renderer* renderer;
+    TTF_Font* font;
     SDL_Texture* cardsTilesheetTexture;
 };
 

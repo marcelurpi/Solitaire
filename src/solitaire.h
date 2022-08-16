@@ -24,6 +24,7 @@ public:
     Completed* getCompleted();
 private:
     void reset();
+    bool winner();
 
     Deck deck;
     Stack stacks[NUM_STACKS];

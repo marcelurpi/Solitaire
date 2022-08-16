@@ -26,6 +26,9 @@ void Solitaire::draw()
         stacks[i].draw();
     }
     movingStack.draw();
+    if (winner()) {
+        TextureManager::Instance()->drawText("Winner!", 192, SDL_Point{0,0});
+    }
 }
 
 void Solitaire::mouseDown(int mouseX, int mouseY) 
@@ -119,4 +122,17 @@ void Solitaire::reset()
             stacks[i].addCard(deck.popCard());
         }
     }
+}
+
+bool Solitaire::winner()
+{
+    if (deck.getCards().size() != 0) {
+        return false;
+    }
+    for (int i = 0; i < NUM_STACKS; i++) {
+        if (stacks[i].getCards().size() != 0) {
+            return false;
+        }
+    }
+    return true;
 }

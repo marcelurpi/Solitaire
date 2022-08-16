@@ -12,6 +12,8 @@ Game::Game() : renderer(nullptr)
 Game::~Game() 
 {
     SDL_DestroyWindow( window );
+    TTF_Quit();
+    IMG_Quit();
 	SDL_Quit();
 }
 
@@ -33,6 +35,11 @@ bool Game::init()
     if( !( IMG_Init( imgFlags ) & imgFlags ) )
     {
         printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
+        return false;
+    }
+    if(TTF_Init() < 0)
+    {
+        printf( "SDL_ttf could not initialize! SDL_ttf Error: %s\n", SDL_GetError() );
         return false;
     }
     renderer = SDL_CreateRenderer(window, -1, 0);
