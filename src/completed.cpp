@@ -44,7 +44,7 @@ bool Completed::mouseUp(int mouseX, int mouseY)
 {
     if (isMouseInsideRect(mouseX, mouseY, &rect) &&
         moving->getSize() == 1 &&
-        cardCanBePlacedOnCompleted(moving->getCardAt(0))) 
+        cardCanBePlacedOnTop(moving->getCardAt(0))) 
     {
         topCompleted = moving->getCardAt(0);
         Stack* fromStack = moving->getFromStack();
@@ -57,11 +57,21 @@ bool Completed::mouseUp(int mouseX, int mouseY)
     return false;
 }
 
-bool Completed::cardCanBePlacedOnCompleted(int card)
+bool Completed::cardCanBePlacedOnTop(int card)
 {
     if (topCompleted == CARD_EMPTY) return card % 14 == 0;
 
     bool sameSuit = card / 14 == topCompleted / 14;
     bool numberJustOver = card % 14 == (topCompleted % 14) + 1;
     return sameSuit && numberJustOver;
+}
+
+int Completed::getCardOnTop()
+{
+    return topCompleted;
+}
+
+void Completed::placeCardOnTop(int card)
+{
+    topCompleted = card;
 }

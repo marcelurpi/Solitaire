@@ -14,7 +14,11 @@ public:
     Deck(int baseX, int baseY, MovingStack* moving);
     void draw();
     void reset();
+    void nextCard();
     int popCard();
+    int getIndex();
+    void removeAtIndex();
+    std::vector<int> getCards();
     void returnCard();
     bool mouseDown(int mouseX, int mouseY);
 private:

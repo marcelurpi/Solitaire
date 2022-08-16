@@ -33,11 +33,36 @@ void Deck::reset()
     shuffle();
 }
 
+void Deck::nextCard()
+{
+    if (index == cards.size() - 1) {
+        index = -1;
+    } else {
+        index++;
+    }
+}
+
 int Deck::popCard()
 {
     int card = cards.back();
     cards.pop_back();
     return card;
+}
+
+int Deck::getIndex()
+{
+    return index;
+}
+
+void Deck::removeAtIndex()
+{
+    cards.erase(cards.begin() + index);
+    index--;
+}
+
+std::vector<int> Deck::getCards()
+{
+    return cards;
 }
 
 void Deck::returnCard()
@@ -50,15 +75,14 @@ void Deck::returnCard()
 bool Deck::mouseDown(int mouseX, int mouseY)
 {
     if (isMouseInsideRect(mouseX, mouseY, &backDeckRect)) {
-        index = ((index + 2) % (cards.size() + 1)) - 1;
+        nextCard();
         return true;
     }
     if (isMouseInsideRect(mouseX, mouseY, &frontDeckRect) && index != -1) {
         SDL_Point mouseOffset{frontDeckRect.x - mouseX, frontDeckRect.y - mouseY};
         MovingCard movingCard{cards[index], mouseOffset};
         moving->addMovingCard(movingCard);
-        cards.erase(cards.begin() + index);
-        index--;
+        removeAtIndex();
         moving->setMovingFrom(MovingFrom::Deck, nullptr, nullptr);
         moving->updatePosition(frontDeckRect.x, frontDeckRect.y);
         return true;

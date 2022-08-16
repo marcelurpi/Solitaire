@@ -4,7 +4,7 @@
 
 Solitaire::Solitaire()
 {
-    srand(2727); //srand(time(0));
+    srand(time(0)); 
     SDL_Point topLeft{-NUM_STACKS * 100 / 2, -50 - (150 + NUM_STACKS * 20) / 2};
     for (int i = 0; i < 4; i++) {
         completed[i] = Completed(topLeft.x + 100 * (3 + i), topLeft.y, &movingStack);
@@ -88,6 +88,21 @@ void Solitaire::keyUp(SDL_Keysym keysym)
     if (keysym.sym == SDLK_r) {
         reset();
     }
+}
+
+Deck* Solitaire::getDeck()
+{
+    return &deck;
+}
+
+Stack* Solitaire::getStacks()
+{
+    return stacks;
+}
+
+Completed* Solitaire::getCompleted()
+{
+    return completed;
 }
 
 void Solitaire::reset()

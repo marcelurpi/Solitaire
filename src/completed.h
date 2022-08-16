@@ -17,9 +17,10 @@ public:
     void returnCard();
     bool mouseDown(int mouseX, int mouseY);
     bool mouseUp(int mouseX, int mouseY);
+    bool cardCanBePlacedOnTop(int card);
+    int getCardOnTop();
+    void placeCardOnTop(int card);
 private:
-    bool cardCanBePlacedOnCompleted(int card);
-
     SDL_Rect rect;
     int topCompleted;
     MovingStack* moving;

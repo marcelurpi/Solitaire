@@ -24,6 +24,11 @@ void Stack::reset()
     cards = std::vector<int>(0);
 }
 
+int Stack::getNumHiddenCards()
+{
+    return numHiddenCards;
+}
+
 void Stack::setNumHiddenCards(int hidden)
 {
     numHiddenCards = hidden;
@@ -64,11 +69,8 @@ bool Stack::mouseDown(int mouseX, int mouseY)
 
 bool Stack::mouseUp(int mouseX, int mouseY)
 {
-    bool clickingValidStack = isMouseInsideRect(mouseX, mouseY, &cardRects[cards.size() - 1]) && 
-        cardCanBePlacedOnStack(moving->getCardAt(0));
-    bool clickingEmptyStack = isMouseInsideRect(mouseX, mouseY, &cardRects[0]) && 
-        cards.size() == 0 && (moving->getCardAt(0) % 14) == 12;
-    if (clickingValidStack || clickingEmptyStack)
+    SDL_Rect rect = cards.size() == 0 ? cardRects[0] : cardRects[cards.size() - 1];
+    if (isMouseInsideRect(mouseX, mouseY, &rect) && cardCanBePlacedOnStack(moving->getCardAt(0)))
     {
         for (int j = 0; j < moving->getSize(); j++) {
             cards.push_back(moving->getCardAt(j));
@@ -83,8 +85,22 @@ bool Stack::mouseUp(int mouseX, int mouseY)
     return false;
 }
 
+std::vector<int> Stack::getCards()
+{
+    return cards;
+}
+
+void Stack::removeCards(int num)
+{
+    for (int i = 0; i < num; i++) {
+        cards.pop_back();
+    }
+    uncoverCardIfPossible();
+}
+
 bool Stack::cardCanBePlacedOnStack(int card) 
 {
+    if (cards.size() == 0) return card % 14 == 12;
     int card2 = cards.back();
     bool oppositeColor = card / 28 != card2 / 28;
     bool numberJustUnder = card % 14 == (card2 % 14) - 1;

@@ -16,13 +16,16 @@ public:
     Stack(int baseX, int baseY, MovingStack* moving);
     void draw();
     void reset();
+    int getNumHiddenCards();
     void setNumHiddenCards(int hidden);
     void addCard(int card);
     void uncoverCardIfPossible();
     bool mouseDown(int mouseX, int mouseY);
     bool mouseUp(int mouseX, int mouseY);
-private:
+    std::vector<int> getCards();
+    void removeCards(int num);
     bool cardCanBePlacedOnStack(int card);
+private:
 
     int index;
     MovingStack* moving;

@@ -19,6 +19,9 @@ public:
     void mouseDrag(int mouseX, int mouseY);
     void keyDown(SDL_Keysym keysym);
     void keyUp(SDL_Keysym keysym);
+    Deck* getDeck();
+    Stack* getStacks();
+    Completed* getCompleted();
 private:
     void reset();
 

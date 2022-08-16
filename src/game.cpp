@@ -6,6 +6,7 @@
 Game::Game() : renderer(nullptr)
 {
     solitaire = new Solitaire();
+    solver = Solver(solitaire->getDeck(), solitaire->getStacks(), solitaire->getCompleted());
 }
 
 Game::~Game() 
@@ -63,6 +64,9 @@ bool Game::mainLoop()
         else if (event.type == SDL_KEYDOWN)
         {
             solitaire->keyDown(event.key.keysym);
+            if (event.key.keysym.sym == SDLK_SPACE) {
+                solver.nextMove();
+            }
         }
         else if (event.type == SDL_KEYUP)
         {

@@ -6,6 +6,7 @@
 #include <SDL_image.h>
 #include <string>
 #include "solitaire.h"
+#include "solver.h"
 
 const int WINDOW_WIDTH = 1280;
 const int WINDOW_HEIGHT = 720;
@@ -22,6 +23,7 @@ private:
     SDL_Window* window;
     SDL_Renderer* renderer;
     Solitaire* solitaire;
+    Solver solver;
 };
 
 #endif // HEADER_GAME
