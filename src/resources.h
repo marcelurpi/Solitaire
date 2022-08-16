@@ -1,6 +1,6 @@
 
-#ifndef HEADER_TEXTURE_MANAGER
-#define HEADER_TEXTURE_MANAGER
+#ifndef RESOURCES
+#define RESOURCES
 
 #include <SDL.h>
 #include <SDL_image.h>
@@ -44,4 +44,4 @@ private:
     Mix_Music* winnerSound;
 };
 
-#endif // HEADER_TEXTURE_MANAGER
+#endif // RESOURCES
