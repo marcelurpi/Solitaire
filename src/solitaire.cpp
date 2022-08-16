@@ -4,8 +4,7 @@
 
 Solitaire::Solitaire()
 {
-    srand(2727); 
-    //srand(time(0)); 
+    srand(time(0)); 
     SDL_Point topLeft{-NUM_STACKS * 100 / 2, -50 - (150 + NUM_STACKS * 20) / 2};
     for (int i = 0; i < 4; i++) {
         completed[i] = Completed(topLeft.x + 100 * (3 + i), topLeft.y, &movingStack);
