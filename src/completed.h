@@ -2,7 +2,7 @@
 #ifndef HEADER_COMPLETED
 #define HEADER_COMPLETED
 
-#include "textureManager.h"
+#include "resources.h"
 #include "moving.h"
 
 class MovingStack;

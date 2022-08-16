@@ -11,7 +11,7 @@ void MovingStack::draw()
     for (int i = 0; i < cards.size(); i++) {
         SDL_Rect cardRect(firstCardRect);
         cardRect.y += i * 20;
-        TextureManager::Instance()->drawCard(cards[i].card, &cardRect, false);
+        Resources::Instance()->drawCard(cards[i].card, &cardRect, false);
     }
 }
 

@@ -2,7 +2,7 @@
 #ifndef HEADER_DECK
 #define HEADER_DECK
 
-#include "textureManager.h"
+#include "resources.h"
 #include "moving.h"
 #include "utils.h"
 #include <vector>

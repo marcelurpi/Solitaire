@@ -26,6 +26,7 @@ private:
     void reset();
     bool winner();
 
+    bool playing;
     Deck deck;
     Stack stacks[NUM_STACKS];
     Completed completed[4];

@@ -2,7 +2,7 @@
 #ifndef HEADER_MOVING
 #define HEADER_MOVING
 
-#include "textureManager.h"
+#include "resources.h"
 #include "stack.h"
 #include <vector>
 

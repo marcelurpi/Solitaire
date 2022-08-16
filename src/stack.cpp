@@ -15,7 +15,7 @@ void Stack::draw()
 {
     for (int i = 0; i < cards.size(); i++) {
         int card = numHiddenCards > i ? CARD_BACK : cards[i];
-        TextureManager::Instance()->drawCard(card, &cardRects[i], false);
+        Resources::Instance()->drawCard(card, &cardRects[i], false);
     }
 }
 
@@ -37,6 +37,7 @@ void Stack::setNumHiddenCards(int hidden)
 void Stack::addCard(int card) 
 {
     cards.push_back(card);
+    Resources::Instance()->playSound(Sound::CardPlace);
 }
 
 void Stack::uncoverCardIfPossible()
@@ -73,7 +74,7 @@ bool Stack::mouseUp(int mouseX, int mouseY)
     if (isMouseInsideRect(mouseX, mouseY, &rect) && cardCanBePlacedOnStack(moving->getCardAt(0)))
     {
         for (int j = 0; j < moving->getSize(); j++) {
-            cards.push_back(moving->getCardAt(j));
+            addCard(moving->getCardAt(j));
         }
         Stack* movingFromStack = moving->getFromStack();
         if (movingFromStack != nullptr) {

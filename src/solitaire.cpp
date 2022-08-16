@@ -4,7 +4,8 @@
 
 Solitaire::Solitaire()
 {
-    srand(time(0)); 
+    srand(2727); 
+    //srand(time(0)); 
     SDL_Point topLeft{-NUM_STACKS * 100 / 2, -50 - (150 + NUM_STACKS * 20) / 2};
     for (int i = 0; i < 4; i++) {
         completed[i] = Completed(topLeft.x + 100 * (3 + i), topLeft.y, &movingStack);
@@ -27,12 +28,16 @@ void Solitaire::draw()
     }
     movingStack.draw();
     if (winner()) {
-        TextureManager::Instance()->drawText("Winner!", 192, SDL_Point{0,0});
+        Resources::Instance()->drawText("Winner!", 192, SDL_Point{0,0});
+        if (playing) Resources::Instance()->playSound(Sound::Winner);
+        playing = false;
     }
 }
 
 void Solitaire::mouseDown(int mouseX, int mouseY) 
 {
+    if (!playing) return;
+
     if (deck.mouseDown(mouseX, mouseY)) {
         return;
     }
@@ -110,6 +115,7 @@ Completed* Solitaire::getCompleted()
 
 void Solitaire::reset()
 {
+    playing = true;
     movingStack.clear();
     for (int i = 0; i < 4; i++) {
         completed[i].reset();

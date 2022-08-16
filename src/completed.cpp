@@ -12,7 +12,7 @@ Completed::Completed(int x, int y, MovingStack* moving)
 void Completed::draw()
 {
     bool transparent = topCompleted == CARD_EMPTY;
-    TextureManager::Instance()->drawCard(topCompleted, &rect, transparent);
+    Resources::Instance()->drawCard(topCompleted, &rect, transparent);
 }
 
 void Completed::reset()
@@ -22,7 +22,11 @@ void Completed::reset()
 
 void Completed::returnCard()
 {
-    topCompleted = moving->getCardAt(0);
+    placeCardOnTop(moving->getCardAt(0));
+    Stack* fromStack = moving->getFromStack();
+    if (fromStack != nullptr) {
+        fromStack->uncoverCardIfPossible();
+    }
     moving->clear();
 }
 
@@ -46,12 +50,7 @@ bool Completed::mouseUp(int mouseX, int mouseY)
         moving->getSize() == 1 &&
         cardCanBePlacedOnTop(moving->getCardAt(0))) 
     {
-        topCompleted = moving->getCardAt(0);
-        Stack* fromStack = moving->getFromStack();
-        if (fromStack != nullptr) {
-            fromStack->uncoverCardIfPossible();
-        }
-        moving->clear();
+        returnCard();
         return true;
     }
     return false;
@@ -74,4 +73,5 @@ int Completed::getCardOnTop()
 void Completed::placeCardOnTop(int card)
 {
     topCompleted = card;
+    Resources::Instance()->playSound(Sound::CardShove);
 }

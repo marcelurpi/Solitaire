@@ -14,12 +14,12 @@ Deck::Deck(int baseX, int baseY, MovingStack* moving)
 void Deck::draw()
 {
     if (index == cards.size() - 1) {
-        TextureManager::Instance()->drawCard(CARD_EMPTY, &backDeckRect, true);
+        Resources::Instance()->drawCard(CARD_EMPTY, &backDeckRect, true);
     } else {
-        TextureManager::Instance()->drawCard(CARD_BACK, &backDeckRect, false);
+        Resources::Instance()->drawCard(CARD_BACK, &backDeckRect, false);
     }
     if (index != -1) {
-        TextureManager::Instance()->drawCard(cards[index], &frontDeckRect, false);
+        Resources::Instance()->drawCard(cards[index], &frontDeckRect, false);
     }
 }
 
@@ -40,6 +40,7 @@ void Deck::nextCard()
     } else {
         index++;
     }
+    Resources::Instance()->playSound(Sound::CardPlace);
 }
 
 int Deck::popCard()
